@@ -3,6 +3,9 @@ import BigDeliveryMan from "../../assets/big-deliveryman.png"
 import TinyDeliveryman from "../../assets/tiny-deliveryman.png"
 import HowItWorks from "../../components/Home/HowItWorks"
 import ServicesSection from "../../components/Home/ServicesSection"
+import TrustedBySection from "../../components/Home/TrustedBySection"
+import MerchantCtaBanner from "../../components/Home/MerchantCtaBanner"
+import TestimonialsSection from "../../components/Home/TestimonialsSection"
  
 const CustomerDashboard = () => {
   return (
@@ -49,7 +52,9 @@ const CustomerDashboard = () => {
    
      <HowItWorks></HowItWorks>
      <ServicesSection></ServicesSection>
-     
+     <TrustedBySection></TrustedBySection>
+     <MerchantCtaBanner></MerchantCtaBanner>
+     <TestimonialsSection></TestimonialsSection>
      
     </div>
     
