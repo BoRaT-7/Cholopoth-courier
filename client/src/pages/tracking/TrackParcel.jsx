@@ -1,25 +1,20 @@
 // src/pages/tracking/TrackParcel.jsx
+import { useParams } from "react-router-dom";
 
 const TrackParcel = () => {
-  return (
-    <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">Track Your Parcel</h1>
-      <p className="text-sm text-gray-500">
-        Tracking ID দিয়ে তোমার পার্সেল কোথায় আছে এখন তা দেখো।
-      </p>
+  const { id } = useParams();          // /tracking/:id
+  const parcel = {};                  // GET /api/parcels/:id + live location via socket
 
-      <form className="space-y-4">
-        <input
-          type="text"
-          placeholder="Enter Tracking ID"
-          className="input input-bordered w-full"
-        />
-        <button type="submit" className="btn btn-primary w-full">
-          Track Now
-        </button>
-      </form>
+  return (
+    <div className="flex">
+      <div className="w-1/3 p-4">
+        {/* parcel info + status timeline */}
+      </div>
+      <div className="w-2/3">
+        {/* Google Map component with current agent location */}
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default TrackParcel;
