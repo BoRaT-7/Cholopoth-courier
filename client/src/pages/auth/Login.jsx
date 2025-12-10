@@ -11,7 +11,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    localStorage.setItem("cp_user", JSON.stringify({ role: "customer" }));
+navigate("/dashboard/customer");
     // future: POST /api/auth/login
     console.log("login data =>", form);
 

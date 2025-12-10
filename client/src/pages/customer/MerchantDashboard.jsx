@@ -53,38 +53,44 @@ const MerchantDashboard = () => {
       </div>
 
       {/* Quick Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-        <button
-          onClick={() => navigate("/customer/new-booking")}
-          className="bg-emerald-600 p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-        >
-          Create Parcel
-        </button>
-        <button
-          onClick={() => navigate("/customer/my-parcels")}
-          className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-        >
-          My Parcels
-        </button>
-        <button
-          onClick={() => navigate("/tracking")}
-          className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-        >
-          Tracking
-        </button>
-        <button
-          onClick={() => navigate("/customer/payments")}
-          className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-        >
-          Payments
-        </button>
-        <button
-          onClick={() => navigate("/customer/profile")}
-          className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-        >
-          Profile
-        </button>
-      </div>
+
+<div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+  <button
+    onClick={() => navigate("/dashboard/customer/new-booking")}
+    className="bg-emerald-600 p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+  >
+    Create Parcel
+  </button>
+
+  <button
+    onClick={() => navigate("/dashboard/customer/parcels")}
+    className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+  >
+    My Parcels
+  </button>
+
+  <button
+    onClick={() => navigate("/track")}
+    className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+  >
+    Tracking
+  </button>
+
+  <button
+    onClick={() => navigate("/dashboard/customer/payments")}
+    className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+  >
+    Payments
+  </button>
+
+  <button
+    onClick={() => navigate("/dashboard/customer/profile")}
+    className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+  >
+    Profile
+  </button>
+</div>
+
 
       {/* Parcel Tracking Input */}
       <div className="bg-[#020617] p-6 shadow rounded-xl max-w-md mx-auto">
