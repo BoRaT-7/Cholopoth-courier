@@ -18,18 +18,31 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const payload = { ...form };
-    // যদি business না থাকে, তখন size খালি করে দিতে পারো
-    if (payload.hasBusiness === "no") {
-      delete payload.businessSize;
-    }
+  const payload = { ...form };
+  if (payload.hasBusiness === "no") {
+    delete payload.businessSize;
+  }
 
-    console.log("signup data =>", payload);
-    // এখানে future এ backend API: POST /api/auth/register (name, email, password, role, hasBusiness, businessSize)
+const res = await fetch("http://localhost:5000/api/auth/register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+});
+
+const data = await res.json();
+
+  console.log("Register response:", data);
+
+  if (res.ok) {
+    alert("Registration successful!");
     navigate("/");
-  };
+  } else {
+    alert(data.message);
+  }
+};
+
 
   const handleGoogleLogin = () => {
     // future এ এখানে Google OAuth redirect করবে, যেমন window.location.href = "/api/auth/google"

@@ -1,111 +1,54 @@
-// src/controllers/auth.controller.js
 import User from "../models/User.js";
-import { generateToken } from "../utils/generateToken.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-// Register - Customer
-export const registerCustomer = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone, address } = req.body;
+    const { name, email, password, role, hasBusiness, businessSize } = req.body;
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+    // 1. check if already exists
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "Email already exists!" });
     }
 
-    const user = new User({
+    // 2. password hash
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3. create user
+    const newUser = await User.create({
       name,
       email,
-      password,
-      phone,
-      address,
-      role: "customer",
+      password: hashedPassword,
+      role,
+      hasBusiness,
+      businessSize: hasBusiness === "yes" ? businessSize : "",
     });
 
-    await user.save();
+    // 4. Generate JWT
+    const token = jwt.sign(
+      {
+        id: newUser._id,
+        role: newUser.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    const token = generateToken(user._id, user.email, user.role);
-
-    res.status(201).json({
-      message: "Customer registered successfully",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    return res.status(201).json({
+      message: "Registration successful!",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        hasBusiness: newUser.hasBusiness,
+        businessSize: newUser.businessSize,
+      },
       token,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Register - Delivery Agent
-export const registerAgent = async (req, res) => {
-  try {
-    const {
-      name,
-      email,
-      password,
-      phone,
-      nid,
-      licenseNumber,
-      vehicleType,
-      vehicleNumber,
-      address,
-    } = req.body;
-
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    const user = new User({
-      name,
-      email,
-      password,
-      phone,
-      nid,
-      licenseNumber,
-      vehicleType,
-      vehicleNumber,
-      address,
-      role: "agent",
-      isVerified: false, // admin verify করবে
-    });
-
-    await user.save();
-
-    const token = generateToken(user._id, user.email, user.role);
-
-    res.status(201).json({
-      message: "Agent registration submitted for verification",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
-      token,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Login
-export const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    const token = generateToken(user._id, user.email, user.role);
-
-    res.json({
-      message: "Login successful",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
-      token,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.log("REGISTER ERROR:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };

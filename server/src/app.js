@@ -1,20 +1,18 @@
-// src/app.js
 import express from "express";
 import cors from "cors";
-import authRoutes from "./routes/auth.routes.js";
-import parcelRoutes from "./routes/parcel.routes.js";
+import dotenv from "dotenv";
+import authRoutes from "./routes/authRoutes.js";
+
+dotenv.config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
-// Mount routes
 app.use("/api/auth", authRoutes);
-app.use("/api/parcels", parcelRoutes);
+
+app.get("/", (req, res) => {
+  res.json({ message: "Server is running 🚀" });
+});
 
 export default app;
