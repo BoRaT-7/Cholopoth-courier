@@ -5,6 +5,8 @@ import Footer from "./components/Footer";
 
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import AgentRegister from "./pages/auth/AgentRegister";
+import AgentLogin from "./pages/auth/AgentLogin";
 
 import AdminLayout from "./layouts/AdminLayout";
 import CustomerLayout from "./layouts/CustomerLayout";
@@ -21,7 +23,7 @@ import NewBooking from "./pages/customer/NewBooking";
 import Payments from "./pages/customer/Payments";
 import Profile from "./pages/customer/Profile";
 import MerchantDashboard from "./pages/customer/MerchantDashboard";
-import AgentRegister from "./pages/auth/AgentRegister";
+
 import AgentDashboard from "./pages/agent/AgentDashboard";
 import AssignedParcels from "./pages/agent/AssignedParcels";
 import RouteMap from "./pages/agent/RouteMap";
@@ -41,6 +43,10 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/track/:trackingId" element={<TrackParcel />} />
 
+          {/* agent public auth */}
+          <Route path="/agent-register" element={<AgentRegister />} />
+          <Route path="/agent-login" element={<AgentLogin />} />
+
           {/* admin */}
           <Route element={<AdminLayout />}>
             <Route path="/dashboard/admin" element={<AdminDashboard />} />
@@ -50,14 +56,14 @@ const App = () => {
           </Route>
 
           {/* customer / merchant */}
-         <Route element={<CustomerLayout />}>
-  <Route path="/dashboard/customer" element={<MerchantDashboard />} />
-  <Route path="/dashboard/customer/parcels" element={<MyParcels />} />
-  <Route path="/dashboard/customer/new-booking" element={<NewBooking />} />
-  <Route path="/dashboard/customer/payments" element={<Payments />} />
-  <Route path="/dashboard/customer/profile" element={<Profile />} />
-</Route>
-<Route path="/agent-register" element={<AgentRegister />} />
+          <Route element={<CustomerLayout />}>
+            <Route path="/dashboard/customer" element={<MerchantDashboard />} />
+            <Route path="/dashboard/customer/parcels" element={<MyParcels />} />
+            <Route path="/dashboard/customer/new-booking" element={<NewBooking />} />
+            <Route path="/dashboard/customer/payments" element={<Payments />} />
+            <Route path="/dashboard/customer/profile" element={<Profile />} />
+          </Route>
+
           {/* agent */}
           <Route element={<AgentLayout />}>
             <Route path="/dashboard/agent" element={<AgentDashboard />} />
