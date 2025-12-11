@@ -1,4 +1,4 @@
-// src/routes/authRoutes.js
+// server/src/routes/authRoutes.js
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
@@ -6,7 +6,7 @@ import { generateToken } from "../utils/generateToken.js";
 
 const router = express.Router();
 
-// REGISTER (customer/agent/admin common)
+// COMMON REGISTER (customer/admin ইত্যাদি)
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role, hasBusiness, businessSize } = req.body;
@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ✅ AGENT REGISTER (always role: 'agent')
+// ✅ AGENT REGISTER (সবসময় role = agent)
 router.post("/agent/register", async (req, res) => {
   try {
     const { name, email, password, phone, vehicleType, nidNumber } = req.body;
@@ -60,7 +60,7 @@ router.post("/agent/register", async (req, res) => {
       name,
       email,
       password: hashed,
-      role: "agent", // IMPORTANT
+      role: "agent",
       phone,
       vehicleType,
       nidNumber,
@@ -77,7 +77,7 @@ router.post("/agent/register", async (req, res) => {
   }
 });
 
-// NORMAL LOGIN (any role)
+// NORMAL LOGIN (সব রোল)
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -109,12 +109,11 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ AGENT ONLY LOGIN
+// ✅ AGENT ONLY LOGIN (role check সহ)
 router.post("/agent/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // only agents
     const user = await User.findOne({ email, role: "agent" });
     if (!user) {
       return res

@@ -1,19 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const MerchantDashboard = () => {
   const navigate = useNavigate();
   const [trackingId, setTrackingId] = useState("");
+  const [summary, setSummary] = useState({
+    totalParcels: 0,
+    booked: 0,
+    inTransit: 0,
+    delivered: 0,
+    totalCOD: 0,
+    totalPrepaid: 0,
+  });
 
-  // Summary stats (mock data)
-  const summary = {
-    totalParcels: 24,
-    booked: 8,
-    inTransit: 10,
-    delivered: 6,
-    totalCOD: 1500,
-    totalPrepaid: 1200,
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("customerToken");
+
+    fetch("http://localhost:5000/api/parcels/summary", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.summary) setSummary(data.summary);
+      })
+      .catch(() => {
+        console.log("Summary fetch error");
+      });
+  }, []);
 
   const handleTrackParcel = () => {
     if (!trackingId) return alert("Enter a valid Tracking ID");
@@ -28,69 +41,84 @@ const MerchantDashboard = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         <div className="bg-[#020617] p-4 rounded-xl shadow flex flex-col items-center">
           <span className="text-gray-400 text-sm">Total Parcels</span>
-          <span className="text-emerald-400 font-semibold text-xl">{summary.totalParcels}</span>
+          <span className="text-emerald-400 font-semibold text-xl">
+            {summary.totalParcels}
+          </span>
         </div>
+
         <div className="bg-[#020617] p-4 rounded-xl shadow flex flex-col items-center">
           <span className="text-gray-400 text-sm">Booked</span>
-          <span className="text-yellow-400 font-semibold text-xl">{summary.booked}</span>
+          <span className="text-yellow-400 font-semibold text-xl">
+            {summary.booked}
+          </span>
         </div>
+
         <div className="bg-[#020617] p-4 rounded-xl shadow flex flex-col items-center">
           <span className="text-gray-400 text-sm">In Transit</span>
-          <span className="text-blue-400 font-semibold text-xl">{summary.inTransit}</span>
+          <span className="text-blue-400 font-semibold text-xl">
+            {summary.inTransit}
+          </span>
         </div>
+
         <div className="bg-[#020617] p-4 rounded-xl shadow flex flex-col items-center">
           <span className="text-gray-400 text-sm">Delivered</span>
-          <span className="text-emerald-300 font-semibold text-xl">{summary.delivered}</span>
+          <span className="text-emerald-300 font-semibold text-xl">
+            {summary.delivered}
+          </span>
         </div>
+
         <div className="bg-[#020617] p-4 rounded-xl shadow flex flex-col items-center">
           <span className="text-gray-400 text-sm">Total COD</span>
-          <span className="text-red-400 font-semibold text-xl">৳ {summary.totalCOD}</span>
+          <span className="text-red-400 font-semibold text-xl">
+            ৳ {summary.totalCOD}
+          </span>
         </div>
+
         <div className="bg-[#020617] p-4 rounded-xl shadow flex flex-col items-center">
           <span className="text-gray-400 text-sm">Total Prepaid</span>
-          <span className="text-green-400 font-semibold text-xl">৳ {summary.totalPrepaid}</span>
+          <span className="text-green-400 font-semibold text-xl">
+            ৳ {summary.totalPrepaid}
+          </span>
         </div>
       </div>
 
       {/* Quick Action Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+        <button
+          onClick={() => navigate("/dashboard/customer/new-booking")}
+          className="bg-emerald-600 p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+        >
+          Create Parcel
+        </button>
 
-<div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-  <button
-    onClick={() => navigate("/dashboard/customer/new-booking")}
-    className="bg-emerald-600 p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-  >
-    Create Parcel
-  </button>
+        <button
+          onClick={() => navigate("/dashboard/customer/parcels")}
+          className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+        >
+          My Parcels
+        </button>
 
-  <button
-    onClick={() => navigate("/dashboard/customer/parcels")}
-    className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-  >
-    My Parcels
-  </button>
+        <button
+          onClick={() => navigate("/track")}
+          className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+        >
+          Tracking
+        </button>
 
-  <button
-    onClick={() => navigate("/track")}
-    className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-  >
-    Tracking
-  </button>
+        <button
+          onClick={() => navigate("/dashboard/customer/payments")}
+          className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+        >
+          Payments
+        </button>
 
-  <button
-    onClick={() => navigate("/dashboard/customer/payments")}
-    className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-  >
-    Payments
-  </button>
-
-  <button
-    onClick={() => navigate("/dashboard/customer/profile")}
-    className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
-  >
-    Profile
-  </button>
-</div>
-
+        <button
+          onClick={() => navigate("/dashboard/customer/profile")}
+          className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
+        >
+          Profile
+        </button>
+      </div>
 
       {/* Parcel Tracking Input */}
       <div className="bg-[#020617] p-6 shadow rounded-xl max-w-md mx-auto">

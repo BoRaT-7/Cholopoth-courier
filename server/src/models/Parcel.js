@@ -1,61 +1,28 @@
-// src/models/Parcel.js
+// server/src/models/Parcel.js
 import mongoose from "mongoose";
 
 const parcelSchema = new mongoose.Schema(
   {
-    trackingCode: {
-      type: String,
-      unique: true,
-      required: true,
-      default: () => "CP-" + Date.now(),
-    },
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // যিনি বুক করছেন
+    trackingId: { type: String, required: true, unique: true },
 
-    // Sender (Customer)
-    senderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    senderName: String,
-    senderPhone: String,
     pickupAddress: { type: String, required: true },
-
-    // Receiver
-    receiverName: { type: String, required: true },
-    receiverPhone: { type: String, required: true },
     deliveryAddress: { type: String, required: true },
 
-    // Parcel Details
-    parcelType: { type: String, enum: ["document", "package", "box"] },
-    weight: { type: Number, required: true }, // kg
-    price: { type: Number, required: true },
+    parcelSize: { type: String, enum: ["Small", "Medium", "Large"], required: true },
+    parcelType: { type: String, required: true },
 
-    // Payment
-    paymentType: { type: String, enum: ["COD", "prepaid"], default: "COD" },
-    codAmount: { type: Number, default: 0 },
-    isPaid: { type: Boolean, default: false },
+    paymentMethod: { type: String, enum: ["COD", "Prepaid"], required: true },
+    codAmount: { type: Number, default: 0 },   // COD হলে এখানে টাকা রাখবে
+    prepaidAmount: { type: Number, default: 0 },
 
-    // Status
     status: {
       type: String,
-      enum: ["pending", "picked_up", "in_transit", "delivered", "failed"],
-      default: "pending",
+      enum: ["Pending", "Picked Up", "In-Transit", "Delivered", "Failed"],
+      default: "Pending",
     },
 
-    // Agent Assignment
-    assignedAgent: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-
-    // Location Tracking
-    currentLocation: {
-      latitude: Number,
-      longitude: Number,
-      updatedAt: Date,
-    },
-
-    createdAt: { type: Date, default: Date.now },
+    agent: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // assign করলে agent
   },
   { timestamps: true }
 );

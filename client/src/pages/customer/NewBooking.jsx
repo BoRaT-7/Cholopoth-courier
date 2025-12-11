@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const API_BASE = "http://localhost:5000";
+
 const NewBooking = () => {
   const [form, setForm] = useState({
     pickupAddress: "",
@@ -7,33 +9,85 @@ const NewBooking = () => {
     parcelSize: "Small",
     parcelType: "Documents",
     payment: "COD",
+    codAmount: 0,
+    prepaidAmount: 0,
   });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   const parcelSizes = ["Small", "Medium", "Large"];
   const parcelTypes = ["Documents", "Electronics", "Fragile items", "Others"];
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleParcelSize = (size) => setForm({ ...form, parcelSize: size });
-  const handlePayment = (e) => setForm({ ...form, payment: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleConfirm = () => {
-    console.log("Pickup Request Data:", form);
-    alert("Pickup request confirmed! Check console for details.");
+  const handleParcelSize = (size) =>
+    setForm({ ...form, parcelSize: size });
+
+  const handlePayment = (e) =>
+    setForm({ ...form, payment: e.target.value });
+
+  const handleConfirm = async () => {
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const token = localStorage.getItem("customerToken");
+      if (!token) {
+        setMessage("Please login as customer first.");
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/api/parcels/book`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data?.message || "Booking failed");
+      } else {
+        setMessage(
+          `Pickup confirmed! Tracking ID: ${data.parcel.trackingId}`
+        );
+        // চাইলে ফর্ম রিসেট করো
+        // setForm({ ...initialState });
+      }
+    } catch (err) {
+      setMessage("Something went wrong, please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gray-100">
       <div className="w-full max-w-4xl bg-white border border-gray-200 rounded-2xl p-8 shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800">New Pickup Request</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+          New Pickup Request
+        </h2>
         <p className="text-sm text-gray-500 mb-6">
           Book a parcel pickup with addresses, parcel size/type, and payment method.
         </p>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        {message && (
+          <div className="mb-4 text-sm px-3 py-2 rounded bg-lime-50 text-lime-700">
+            {message}
+          </div>
+        )}
 
+        <div className="grid md:grid-cols-2 gap-6">
           {/* Pickup Address */}
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Pickup Address</label>
+            <label className="block text-sm text-gray-600 mb-1">
+              Pickup Address
+            </label>
             <input
               name="pickupAddress"
               value={form.pickupAddress}
@@ -47,7 +101,9 @@ const NewBooking = () => {
 
           {/* Delivery Address */}
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Delivery Address</label>
+            <label className="block text-sm text-gray-600 mb-1">
+              Delivery Address
+            </label>
             <input
               name="deliveryAddress"
               value={form.deliveryAddress}
@@ -61,7 +117,9 @@ const NewBooking = () => {
 
           {/* Parcel Size */}
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Parcel Size</label>
+            <label className="block text-sm text-gray-600 mb-2">
+              Parcel Size
+            </label>
             <div className="inline-flex gap-2">
               {parcelSizes.map((size) => (
                 <button
@@ -82,7 +140,9 @@ const NewBooking = () => {
 
           {/* Parcel Type */}
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Parcel Type</label>
+            <label className="block text-sm text-gray-600 mb-2">
+              Parcel Type
+            </label>
             <select
               name="parcelType"
               value={form.parcelType}
@@ -90,14 +150,18 @@ const NewBooking = () => {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500"
             >
               {parcelTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
           </div>
 
           {/* Payment */}
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Payment Method</label>
+            <label className="block text-sm text-gray-600 mb-2">
+              Payment Method
+            </label>
             <div className="space-y-2 text-sm">
               <label className="flex items-center gap-2">
                 <input
@@ -124,7 +188,7 @@ const NewBooking = () => {
             </div>
           </div>
 
-          {/* Summary Box */}
+          {/* Summary Box (স্ট্যাটিক, চাইলে backend থেকে estimate আনতে পারো) */}
           <div className="md:col-span-2">
             <label className="block text-sm text-gray-600 mb-2">Summary</label>
             <div className="border border-gray-300 rounded-lg p-4 space-y-2 text-sm">
@@ -134,7 +198,9 @@ const NewBooking = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Estimated Delivery</span>
-                <span className="text-lime-500 font-semibold">Today, 6–8 PM</span>
+                <span className="text-lime-500 font-semibold">
+                  Today, 6–8 PM
+                </span>
               </div>
             </div>
           </div>
@@ -152,9 +218,10 @@ const NewBooking = () => {
           <button
             type="button"
             onClick={handleConfirm}
-            className="px-6 py-2 text-sm rounded-full bg-lime-500 hover:bg-lime-600 text-white font-medium"
+            disabled={loading}
+            className="px-6 py-2 text-sm rounded-full bg-lime-500 hover:bg-lime-600 text-white font-medium disabled:opacity-50"
           >
-            Confirm Pickup
+            {loading ? "Booking..." : "Confirm Pickup"}
           </button>
         </div>
       </div>
