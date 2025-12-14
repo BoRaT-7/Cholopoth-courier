@@ -6,12 +6,14 @@ const NewBooking = () => {
   const [form, setForm] = useState({
     pickupAddress: "",
     deliveryAddress: "",
+    productId: "",      // NEW FIELD
     parcelSize: "Small",
     parcelType: "Documents",
     payment: "COD",
     codAmount: 0,
     prepaidAmount: 0,
   });
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -56,8 +58,6 @@ const NewBooking = () => {
         setMessage(
           `Pickup confirmed! Tracking ID: ${data.parcel.trackingId}`
         );
-        // চাইলে ফর্ম রিসেট করো
-        // setForm({ ...initialState });
       }
     } catch (err) {
       setMessage("Something went wrong, please try again.");
@@ -109,6 +109,22 @@ const NewBooking = () => {
               value={form.deliveryAddress}
               onChange={handleChange}
               placeholder="House, Road, Area"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500"
+              type="text"
+              required
+            />
+          </div>
+
+          {/* Product ID (NEW) */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Product ID
+            </label>
+            <input
+              name="productId"
+              value={form.productId}
+              onChange={handleChange}
+              placeholder="Enter Product ID"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500"
               type="text"
               required
@@ -188,7 +204,7 @@ const NewBooking = () => {
             </div>
           </div>
 
-          {/* Summary Box (স্ট্যাটিক, চাইলে backend থেকে estimate আনতে পারো) */}
+          {/* Summary */}
           <div className="md:col-span-2">
             <label className="block text-sm text-gray-600 mb-2">Summary</label>
             <div className="border border-gray-300 rounded-lg p-4 space-y-2 text-sm">

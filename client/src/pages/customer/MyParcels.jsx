@@ -1,5 +1,5 @@
 // src/pages/customer/MyParcels.jsx
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import ParcelCard from "../../components/ParcelCard";
 import StatusBadge from "../../components/StatusBadge";
 
@@ -7,9 +7,8 @@ const MyParcels = () => {
   const [parcels, setParcels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Dummy data (fallback)
   const dummyParcels = [
     {
       id: 1,
@@ -49,59 +48,80 @@ const MyParcels = () => {
     },
   ];
 
-  // Fetch from backend
   useEffect(() => {
+    const controller = new AbortController();
     const token = localStorage.getItem("customerToken");
 
-    fetch("http://localhost:5000/api/parcels/my-parcels", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.parcels) {
+    const fetchParcels = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/parcels/my-parcels",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
+          }
+        );
+
+        if (!res.ok) {
+          setParcels(dummyParcels);
+          return;
+        }
+
+        const data = await res.json();
+        if (data?.parcels && Array.isArray(data.parcels)) {
           setParcels(data.parcels);
         } else {
-          setParcels(dummyParcels); // fallback
+          setParcels(dummyParcels);
         }
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setParcels(dummyParcels);
+        }
+      } finally {
         setLoading(false);
-      })
-      .catch(() => {
-        setParcels(dummyParcels); // fallback on error
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchParcels();
+
+    return () => controller.abort();
   }, []);
 
-  const filtered = parcels.filter((p) => {
-    const matchStatus =
+  const filteredParcels = parcels.filter((parcel) => {
+    const matchesStatus =
       statusFilter === "all" ||
-      p.status.toLowerCase() === statusFilter.toLowerCase();
+      parcel.status.toLowerCase() === statusFilter.toLowerCase();
 
-    const matchSearch =
-      p.trackingId.toLowerCase().includes(search.toLowerCase()) ||
-      p.receiverName.toLowerCase().includes(search.toLowerCase());
+    const lowerSearch = searchTerm.toLowerCase();
+    const matchesSearch =
+      parcel.trackingId.toLowerCase().includes(lowerSearch) ||
+      parcel.receiverName.toLowerCase().includes(lowerSearch);
 
-    return matchStatus && matchSearch;
+    return matchesStatus && matchesSearch;
   });
 
   if (loading) {
     return (
-      <div className="text-center py-10 text-slate-500">Loading parcels...</div>
+      <div className="py-10 text-center text-slate-500">
+        Loading parcels...
+      </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold mb-1">My Parcels</h1>
+      <header>
+        <h1 className="mb-1 text-2xl font-semibold">My Parcels</h1>
         <p className="text-sm text-slate-500">
           Track and manage all parcels you have booked.
         </p>
-      </div>
+      </header>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center justify-between bg-white p-3 rounded-xl shadow-sm">
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-sm">
         <div className="flex gap-2 text-xs">
           <button
+            type="button"
             onClick={() => setStatusFilter("all")}
             className={`px-3 py-1 rounded-full border text-xs ${
               statusFilter === "all"
@@ -113,6 +133,7 @@ const MyParcels = () => {
           </button>
 
           <button
+            type="button"
             onClick={() => setStatusFilter("Pending")}
             className="px-3 py-1 rounded-full border text-xs"
           >
@@ -120,6 +141,7 @@ const MyParcels = () => {
           </button>
 
           <button
+            type="button"
             onClick={() => setStatusFilter("In-Transit")}
             className="px-3 py-1 rounded-full border text-xs"
           >
@@ -127,6 +149,7 @@ const MyParcels = () => {
           </button>
 
           <button
+            type="button"
             onClick={() => setStatusFilter("Delivered")}
             className="px-3 py-1 rounded-full border text-xs"
           >
@@ -137,24 +160,26 @@ const MyParcels = () => {
         <input
           type="text"
           placeholder="Search by tracking ID or name"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-64 border border-slate-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-lime-500"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm outline-none focus:border-lime-500 md:w-64"
         />
-      </div>
+      </section>
 
-      {/* Parcel List */}
-      {filtered.length === 0 ? (
-        <div className="text-sm text-slate-500 bg-white rounded-xl p-6 text-center">
-          No parcels found for this filter.
-        </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {filtered.map((parcel) => (
-            <ParcelCard key={parcel.id} parcel={parcel} />
-          ))}
-        </div>
-      )}
+      {/* Parcel list */}
+      <section>
+        {filteredParcels.length === 0 ? (
+          <div className="rounded-xl bg-white p-6 text-center text-sm text-slate-500">
+            No parcels found for this filter.
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {filteredParcels.map((parcel) => (
+              <ParcelCard key={parcel.id} parcel={parcel} />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };
