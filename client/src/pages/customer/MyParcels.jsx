@@ -9,45 +9,6 @@ const MyParcels = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const dummyParcels = [
-    {
-      id: 1,
-      trackingId: "CP-1001",
-      receiverName: "Rahim Uddin",
-      from: "Dhaka",
-      to: "Chattogram",
-      status: "In-Transit",
-      weight: 1.2,
-      codAmount: 750,
-      type: "COD",
-      bookedAt: "10 Dec 2025",
-    },
-    {
-      id: 2,
-      trackingId: "CP-1002",
-      receiverName: "Karim Ahmed",
-      from: "Dhaka",
-      to: "Sylhet",
-      status: "Delivered",
-      weight: 0.8,
-      codAmount: 1200,
-      type: "Prepaid",
-      bookedAt: "08 Dec 2025",
-    },
-    {
-      id: 3,
-      trackingId: "CP-1003",
-      receiverName: "Nusrat Jahan",
-      from: "Gazipur",
-      to: "Dhaka",
-      status: "Pending",
-      weight: 2.5,
-      codAmount: 500,
-      type: "COD",
-      bookedAt: "11 Dec 2025",
-    },
-  ];
-
   useEffect(() => {
     const controller = new AbortController();
     const token = localStorage.getItem("customerToken");
@@ -62,20 +23,25 @@ const MyParcels = () => {
           }
         );
 
-        if (!res.ok) {
-          setParcels(dummyParcels);
-          return;
+        let baseParcels = [];
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.parcels && Array.isArray(data.parcels)) {
+            baseParcels = data.parcels;
+          }
         }
 
-        const data = await res.json();
-        if (data?.parcels && Array.isArray(data.parcels)) {
-          setParcels(data.parcels);
-        } else {
-          setParcels(dummyParcels);
-        }
+        // localStorage থেকে নতুন বুকিংগুলা আনো
+        const local = JSON.parse(localStorage.getItem("myParcels") || "[]");
+
+        // merge করে setParcels
+        setParcels([...baseParcels, ...local]);
       } catch (error) {
         if (error.name !== "AbortError") {
-          setParcels(dummyParcels);
+          // শুধু localStorage এর data দেখাও (backend ডাউন থাকলে)
+          const local = JSON.parse(localStorage.getItem("myParcels") || "[]");
+          setParcels(local);
         }
       } finally {
         setLoading(false);
@@ -90,12 +56,12 @@ const MyParcels = () => {
   const filteredParcels = parcels.filter((parcel) => {
     const matchesStatus =
       statusFilter === "all" ||
-      parcel.status.toLowerCase() === statusFilter.toLowerCase();
+      parcel.status?.toLowerCase() === statusFilter.toLowerCase();
 
     const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
-      parcel.trackingId.toLowerCase().includes(lowerSearch) ||
-      parcel.receiverName.toLowerCase().includes(lowerSearch);
+      parcel.trackingId?.toLowerCase().includes(lowerSearch) ||
+      (parcel.receiverName || "").toLowerCase().includes(lowerSearch);
 
     return matchesStatus && matchesSearch;
   });
@@ -175,7 +141,10 @@ const MyParcels = () => {
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {filteredParcels.map((parcel) => (
-              <ParcelCard key={parcel.id} parcel={parcel} />
+              <ParcelCard
+                key={parcel.id || parcel._id || parcel.trackingId}
+                parcel={parcel}
+              />
             ))}
           </div>
         )}

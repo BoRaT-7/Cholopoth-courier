@@ -1,3 +1,4 @@
+// src/pages/customer/MerchantDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -84,6 +85,7 @@ const MerchantDashboard = () => {
 
       {/* Quick Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+        {/* New Booking page */}
         <button
           onClick={() => navigate("/dashboard/customer/new-booking")}
           className="bg-emerald-600 p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
@@ -91,6 +93,7 @@ const MerchantDashboard = () => {
           Create Parcel
         </button>
 
+        {/* MyParcels list page */}
         <button
           onClick={() => navigate("/dashboard/customer/parcels")}
           className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
@@ -98,6 +101,7 @@ const MerchantDashboard = () => {
           My Parcels
         </button>
 
+        {/* Tracking main page */}
         <button
           onClick={() => navigate("/track")}
           className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"

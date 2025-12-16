@@ -1,0 +1,4 @@
+export const generateTrackingId = () => {
+  const num = Math.floor(100000 + Math.random() * 900000); 
+  return `CP-${num}`;
+};

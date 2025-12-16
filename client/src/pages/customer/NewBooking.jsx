@@ -2,21 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { routePricing } from "../../data/routePricing";
+import { generateTrackingId } from "../../utils/generateTrackingId";
 
 const NewBooking = () => {
-  // form state
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [size, setSize] = useState(""); // 'small' | 'medium' | 'big'
   const [price, setPrice] = useState(null);
 
-  // unique from locations
   const fromLocations = useMemo(() => {
     const unique = new Set(routePricing.map((r) => r.from));
     return Array.from(unique);
   }, []);
 
-  // selected from অনুযায়ী available to locations
   const toLocations = useMemo(() => {
     if (!from) return [];
     const filtered = routePricing.filter((r) => r.from === from);
@@ -24,7 +22,6 @@ const NewBooking = () => {
     return Array.from(unique);
   }, [from]);
 
-  // price calculate করার ফাংশন
   const calculatePrice = () => {
     if (!from || !to || !size) {
       setPrice(null);
@@ -38,22 +35,52 @@ const NewBooking = () => {
       return;
     }
 
-    const selectedPrice = route.pricing[size]; // small/medium/big
+    const selectedPrice = route.pricing[size];
     setPrice(selectedPrice);
   };
 
-  // form submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    calculatePrice();
 
-    // এখানে পরে backend এ বুকিং create করার API কল করবে
-    // উদাহরণ:
-    // createParcel({ from, to, size, price })
+    // আগে price না থাকলে calculate করে নেই
+    if (price === null) {
+      calculatePrice();
+    }
+
+    if (!from || !to || !size) {
+      alert("Please select from, to and size");
+      return;
+    }
+
+    // 1) tracking id generate
+    const trackingId = generateTrackingId();
+
+    // 2) new parcel object বানাই (future এ backend payload হবে)
+    const newParcel = {
+      id: Date.now(), // demo purpose
+      trackingId,
+      from,
+      to,
+      status: "Pending",
+      weight: size === "small" ? 0.5 : size === "medium" ? 1 : 2,
+      codAmount: price || 0,
+      type: "COD",
+      bookedAt: new Date().toLocaleDateString("en-GB"), // 16 Dec 2025 ফরম্যাট[web:42]
+    };
+
+    // 3) localStorage এ save করি যেন MyParcels পেইজে দেখা যায়
+    const existing = JSON.parse(localStorage.getItem("myParcels") || "[]");
+    existing.push(newParcel);
+    localStorage.setItem("myParcels", JSON.stringify(existing));
+
+    alert(`Booking Confirmed! Tracking ID: ${trackingId}`);
+
+    // form reset
+    setFrom("");
+    setTo("");
+    setSize("");
+    setPrice(null);
   };
-
-  // from/to/size বদলালে সাথে সাথে price আপডেট করতে চাইলে useEffect ব্যবহার করতে পারো
-  // এখানে simplicity জন্য শুধু calculatePrice বাটনে বা submit এ কল করা হয়েছে
 
   return (
     <div className="max-w-xl mx-auto p-4">
@@ -141,7 +168,6 @@ const NewBooking = () => {
           </div>
         )}
 
-        {/* Submit button */}
         <button
           type="submit"
           className="px-4 py-2 bg-emerald-600 text-white rounded"
