@@ -1,38 +1,11 @@
 // src/pages/customer/MerchantDashboard.jsx
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useParcelContext } from "../../context/ParcelContext";
 
 const MerchantDashboard = () => {
   const navigate = useNavigate();
-  const [trackingId, setTrackingId] = useState("");
-  const [summary, setSummary] = useState({
-    totalParcels: 0,
-    booked: 0,
-    inTransit: 0,
-    delivered: 0,
-    totalCOD: 0,
-    totalPrepaid: 0,
-  });
-
-  useEffect(() => {
-    const token = localStorage.getItem("customerToken");
-
-    fetch("http://localhost:5000/api/parcels/summary", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.summary) setSummary(data.summary);
-      })
-      .catch(() => {
-        console.log("Summary fetch error");
-      });
-  }, []);
-
-  const handleTrackParcel = () => {
-    if (!trackingId) return alert("Enter a valid Tracking ID");
-    navigate(`/tracking/${trackingId}`);
-  };
+  const { summary } = useParcelContext(); // context থেকে summary
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#02091F] to-[#001F24] p-6 text-white">
@@ -85,7 +58,6 @@ const MerchantDashboard = () => {
 
       {/* Quick Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-        {/* New Booking page */}
         <button
           onClick={() => navigate("/dashboard/customer/new-booking")}
           className="bg-emerald-600 p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
@@ -93,7 +65,6 @@ const MerchantDashboard = () => {
           Create Parcel
         </button>
 
-        {/* MyParcels list page */}
         <button
           onClick={() => navigate("/dashboard/customer/parcels")}
           className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
@@ -101,7 +72,6 @@ const MerchantDashboard = () => {
           My Parcels
         </button>
 
-        {/* Tracking main page */}
         <button
           onClick={() => navigate("/track")}
           className="bg-[#020617] p-6 rounded-xl shadow hover:brightness-110 transition font-semibold"
@@ -122,26 +92,6 @@ const MerchantDashboard = () => {
         >
           Profile
         </button>
-      </div>
-
-      {/* Parcel Tracking Input */}
-      <div className="bg-[#020617] p-6 shadow rounded-xl max-w-md mx-auto">
-        <h2 className="text-lg font-semibold mb-3">Track a Parcel</h2>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Enter Tracking ID"
-            value={trackingId}
-            onChange={(e) => setTrackingId(e.target.value)}
-            className="flex-1 p-2 rounded-lg text-black outline-none"
-          />
-          <button
-            onClick={handleTrackParcel}
-            className="bg-lime-500 px-4 rounded-lg font-semibold hover:bg-lime-600 transition"
-          >
-            Track
-          </button>
-        </div>
       </div>
     </div>
   );

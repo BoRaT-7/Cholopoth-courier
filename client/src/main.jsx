@@ -1,13 +1,21 @@
-import { StrictMode } from "react"
-import { createRoot } from "react-dom/client"
-import { BrowserRouter } from "react-router-dom"
-import App from "./App.jsx"
-import "./styles/index.css"
+// src/main.jsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+import { ParcelProvider } from "./context/ParcelContext";
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
+// ⬇️ এখানে তোমার CSS file import করবে
+import "./styles/index.css";      // যদি ফাইল src/styles/index.css হয়
+// বা
+// import "./index.css";         // যদি src/index.css হয়
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <ParcelProvider>
+        <App />
+      </ParcelProvider>
     </BrowserRouter>
-  </StrictMode>
-)
+  </React.StrictMode>
+);

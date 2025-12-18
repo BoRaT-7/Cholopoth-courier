@@ -59,7 +59,10 @@ const App = () => {
           <Route element={<CustomerLayout />}>
             <Route path="/dashboard/customer" element={<MerchantDashboard />} />
             <Route path="/dashboard/customer/parcels" element={<MyParcels />} />
-            <Route path="/dashboard/customer/new-booking" element={<NewBooking />} />
+            <Route
+              path="/dashboard/customer/new-booking"
+              element={<NewBooking />}
+            />
             <Route path="/dashboard/customer/payments" element={<Payments />} />
             <Route path="/dashboard/customer/profile" element={<Profile />} />
           </Route>
@@ -67,7 +70,10 @@ const App = () => {
           {/* agent */}
           <Route element={<AgentLayout />}>
             <Route path="/dashboard/agent" element={<AgentDashboard />} />
-            <Route path="/dashboard/agent/parcels" element={<AssignedParcels />} />
+            <Route
+              path="/dashboard/agent/parcels"
+              element={<AssignedParcels />}
+            />
             <Route path="/dashboard/agent/route" element={<RouteMap />} />
           </Route>
         </Routes>

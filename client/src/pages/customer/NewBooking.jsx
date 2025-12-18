@@ -1,6 +1,6 @@
 // src/pages/customer/NewBooking.jsx
-
 import { useMemo, useState } from "react";
+import { useParcelContext } from "../../context/ParcelContext";
 import { routePricing } from "../../data/routePricing";
 import { generateTrackingId } from "../../utils/generateTrackingId";
 
@@ -9,6 +9,8 @@ const NewBooking = () => {
   const [to, setTo] = useState("");
   const [size, setSize] = useState(""); // 'small' | 'medium' | 'big'
   const [price, setPrice] = useState(null);
+
+  const { incrementSummaryOnNewParcel } = useParcelContext();
 
   const fromLocations = useMemo(() => {
     const unique = new Set(routePricing.map((r) => r.from));
@@ -42,20 +44,18 @@ const NewBooking = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // আগে price না থাকলে calculate করে নেই
-    if (price === null) {
-      calculatePrice();
-    }
-
     if (!from || !to || !size) {
       alert("Please select from, to and size");
       return;
     }
 
-    // 1) tracking id generate
+    if (price === null) {
+      calculatePrice();
+      // next submit এ price ready থাকবে
+    }
+
     const trackingId = generateTrackingId();
 
-    // 2) new parcel object বানাই (future এ backend payload হবে)
     const newParcel = {
       id: Date.now(), // demo purpose
       trackingId,
@@ -65,13 +65,16 @@ const NewBooking = () => {
       weight: size === "small" ? 0.5 : size === "medium" ? 1 : 2,
       codAmount: price || 0,
       type: "COD",
-      bookedAt: new Date().toLocaleDateString("en-GB"), // 16 Dec 2025 ফরম্যাট[web:42]
+      bookedAt: new Date().toLocaleDateString("en-GB"), // 16/12/2025
     };
 
-    // 3) localStorage এ save করি যেন MyParcels পেইজে দেখা যায়
+    // localStorage এ save
     const existing = JSON.parse(localStorage.getItem("myParcels") || "[]");
     existing.push(newParcel);
     localStorage.setItem("myParcels", JSON.stringify(existing));
+
+    // Dashboard summary instant update
+    incrementSummaryOnNewParcel(newParcel);
 
     alert(`Booking Confirmed! Tracking ID: ${trackingId}`);
 
@@ -120,9 +123,7 @@ const NewBooking = () => {
             }}
             disabled={!from}
           >
-            <option value="">
-              {from ? "Select To" : "Select From first"}
-            </option>
+            <option value="">{from ? "Select To" : "Select From first"}</option>
             {toLocations.map((location) => (
               <option key={location} value={location}>
                 {location}
